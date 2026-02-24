@@ -1104,6 +1104,23 @@
       }
 
       gameLoop();
+
+      // Pause music when app goes to background or phone is locked
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+          if (window.musicInterval) {
+            window.stopMusic();
+            state._musicWasPlaying = true;
+          }
+        } else {
+          if (state._musicWasPlaying) {
+            state._musicWasPlaying = false;
+            if (state.screen === 'game') {
+              window.startMusic();
+            }
+          }
+        }
+      });
     })();
   </script>
 </body>
