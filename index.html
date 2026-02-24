@@ -318,6 +318,14 @@
       state.screen = 'levelSelect';
     };
 
+    window.goToInstructions = function(state) {
+      state.screen = 'instructions';
+    };
+
+    window.goToTitle = function(state) {
+      state.screen = 'title';
+    };
+
     // === MUSIC ===
     window.musicCtx = null;
     window.musicInterval = null;
@@ -645,6 +653,14 @@
         return 'complete';
       }
 
+      // Auto-complete if camera scrolled past the flag
+      for (var fi = 0; fi < state.obstacles.length; fi++) {
+        if (state.obstacles[fi].type === 'flag' && state.cameraX > state.obstacles[fi].x) {
+          window.handleLevelComplete(state);
+          return 'complete';
+        }
+      }
+
       // Fall off platform (walk off edge)
       if (player.isOnGround && player.y < window.GROUND_Y - player.height - 1) {
         var onAnyPlatform = false;
@@ -763,6 +779,15 @@
           if (mx > 325 && mx < 475 && my > 270 && my < 320) {
             window.goToLevelSelect(state);
           }
+          // How to Play button area
+          if (mx > 310 && mx < 490 && my > 335 && my < 375) {
+            window.goToInstructions(state);
+          }
+        } else if (state.screen === 'instructions') {
+          // Back button area
+          if (mx > 325 && mx < 475 && my > 390 && my < 430) {
+            window.goToTitle(state);
+          }
         } else if (state.screen === 'goodJob') {
           window.goToLevelSelect(state);
         } else if (state.screen === 'levelSelect') {
@@ -827,6 +852,72 @@
         ctx.fillStyle = '#fff';
         ctx.font = 'bold 28px Arial';
         ctx.fillText('Play', 400, 305);
+
+        // How to Play button
+        ctx.fillStyle = '#3498db';
+        ctx.fillRect(310, 335, 180, 40);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 22px Arial';
+        ctx.fillText('How to Play', 400, 362);
+        ctx.textAlign = 'left';
+      }
+
+      function drawInstructions() {
+        window.drawBackground(ctx, 0);
+        window.drawClouds(ctx, state.clouds);
+
+        // Title
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 3;
+        ctx.font = 'bold 40px Arial';
+        ctx.textAlign = 'center';
+        ctx.strokeText('How to Play', 400, 50);
+        ctx.fillText('How to Play', 400, 50);
+
+        // Controls section
+        ctx.font = 'bold 22px Arial';
+        ctx.fillStyle = '#ffe066';
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        ctx.strokeText('Controls:', 400, 95);
+        ctx.fillText('Controls:', 400, 95);
+
+        ctx.font = '18px Arial';
+        ctx.fillStyle = '#fff';
+        ctx.strokeText('Arrow Up / Tap = Jump', 400, 125);
+        ctx.fillText('Arrow Up / Tap = Jump', 400, 125);
+        ctx.strokeText('Arrow Down / Swipe Down = Duck', 400, 150);
+        ctx.fillText('Arrow Down / Swipe Down = Duck', 400, 150);
+
+        // Tips section
+        ctx.font = 'bold 22px Arial';
+        ctx.fillStyle = '#ffe066';
+        ctx.strokeText('Tips:', 400, 195);
+        ctx.fillText('Tips:', 400, 195);
+
+        ctx.font = '18px Arial';
+        ctx.fillStyle = '#fff';
+        var tips = [
+          'Jump over ground spikes',
+          'Duck under overhead spikes',
+          'Bounce pads launch you higher',
+          'Land on platforms to stay safe',
+          'Collect coins as you run',
+          'Reach the flag to complete the level'
+        ];
+        for (var i = 0; i < tips.length; i++) {
+          ctx.strokeText(tips[i], 400, 225 + i * 27);
+          ctx.fillText(tips[i], 400, 225 + i * 27);
+        }
+
+        // Back button
+        ctx.fillStyle = '#e74c3c';
+        ctx.fillRect(325, 390, 150, 40);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 22px Arial';
+        ctx.strokeStyle = 'transparent';
+        ctx.fillText('Back', 400, 417);
         ctx.textAlign = 'left';
       }
 
@@ -1003,6 +1094,7 @@
         // Draw
         ctx.clearRect(0, 0, window.CANVAS_WIDTH, window.CANVAS_HEIGHT);
         if (state.screen === 'title') drawTitleScreen();
+        else if (state.screen === 'instructions') drawInstructions();
         else if (state.screen === 'levelSelect') drawLevelSelect();
         else if (state.screen === 'game') drawGameScreen();
         else if (state.screen === 'goodJob') drawGoodJob();
